@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{% endblock title %}
+
+{% block body %}
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 ">
+    <h1 class="h2">Please Find Our Awesome Collection of Bikes to Buy</h1>
+  </div>
+</main>
+
+<div class="album py-5 bg-light" class="ml-sm-auto col-lg-10 px-4" >
+    <div class="row">
+      {% for cycle in cycles %}
+
+        <div class="col-md-4">
+          <div class="card mb-4 shadow-sm">
+            <img src="{{ cycle.cycle_img.url }}"  class="d-block w-100" width="320" height="384"alt="...">
+            <!--img src="{% static '{{ cycle.img }}' %}"  class="d-block w-100" width="320" height="384"alt="...">
+            <img src="{% static 'images/cycle2.jpg' %}" class="d-block w-100" width="320" height="384"alt="..."-->
+            <div class="card-body">
+              <p class="card-text">Model: {{ cycle.model }} <br> DOP {{ cycle.dop }} <br>Address :{{cycle.owner.address}}  </p>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="btn-group">
+                 <button type="button" class="btn btn-sm btn-outline-secondary" ><a href="details/{{cycle.id}}">Buy</a></button>
+                </div>
+                <small class="text-muted">Rs {{ cycle.price }}</small>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+
+      {% endfor %}
+        
+      </div>
+
+{% endblock body %}

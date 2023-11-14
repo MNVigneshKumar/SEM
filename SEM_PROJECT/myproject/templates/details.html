@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{% endblock title %}
+
+{% block body %}
+
+{% if user.is_authenticated %}
+
+<section style="background-color: whitesmoke;">
+    <div class="container my-5 py-5">
+      <div class="row d-flex justify-content-center">
+        <div class="col-md-12 col-lg-10">
+            <div class="wrapper row">
+                <div class="preview col-md-6">
+                    
+                    <div class="preview-pic tab-content">
+                      <div class="tab-pane active" id="pic-1"><img src={{ cycle.cycle_img.url }} class="img-fluid"/></div>
+                    </div>
+                    
+                </div>
+                <div class="details col-md-6">
+                    <h3 class="product-title">{{cycle.model}} </h3>
+                    <div class="rating">
+                        <div class="stars">
+                          <span>Rating</span>
+                          
+                          {% for i in rating  %}
+                          
+                            <span class="fa fa-star checked"></span>
+                            {% endfor %}
+                            <!-- <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star"></span>
+                            <span class="fa fa-star"></span> -->
+                        </div>
+                        <span class="review-no">{{cycle.no_of_rents}} Rents</span>
+                    </div>
+                    
+                    <p class="product-description">{{cycle.description}}</p>
+                    <h4 class="price">Price: <span>Rs {{ cycle.price }}</span></h4>
+                    <br>
+                          <div>
+                        <h5>Address:</h5>
+                        {{ cycle.owner.address }}
+                    </div>
+                    <br>
+                  
+                        <div>
+                            <h5>Owner:</h5>
+                            {{ cycle.owner.authUser.first_name }}
+                        </div>
+                        <br>
+                        <div>
+                          <h5>Owner Contact:</h5>
+                          {{ cycle.owner.phone }}
+                      </div>
+                      <form id="chat" method="post" action="/chat">
+                        {% csrf_token %}
+                        <input type="hidden" name="cycle_id" value="{{ cycle.id }}" />
+                        <input type="hidden" name="owner_id" value="{{ cycle.owner.id }}" />
+                        <button id="chat"class="btn btn-success btn-lg float-right" type="submit">chat with owner   </button>
+                      </form>
+     
+
+                                <form id="myform" method="post" action="/checkout">
+                                  {% csrf_token %}
+                                  <input type="hidden" name="cycle_id" value="{{ cycle.id }}" />
+                                  <input type="hidden" name="cycle_model" value="{{ cycle.model }}" />
+                                  <input type="hidden" name="cycle_price" value="{{ cycle.price }}" />
+                                  <button id="checkout"class="btn btn-success btn-lg float-right mx-2" type="submit">Checkout</button>
+                                </form>
+                        
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</section>
+
+
+<section style="background-color: whitesmoke;">
+    <div class="container my-5 py-5">
+      <div class="row d-flex justify-content-center">
+        <div class="col-md-12 col-lg-10">
+          <div class="card text-dark">
+            <h3 class="mb-0">Recent Reviews</h3>
+              <p class="fw-light mb-4 pb-2">Latest Comments section by users</p>
+                <hr class="my-0" />
+        {% for review in reviews %}
+            <div class="card-body p-4">      
+              <div class="d-flex flex-start">
+                <img class="rounded-circle shadow-1-strong me-3"
+                  src={{review.img_link}} alt="avatar" width="60"
+                  height="60" />
+                <div>
+                  <h6 class="fw-bold mb-1">{{review.user_name}}</h6>
+                  <div class="d-flex align-items-center mb-3">
+                    <p class="mb-0">
+                        {{review.date}}
+                    </p>
+                  </div>
+                  <p class="mb-0">
+                    {{review.content}}
+                  </p>
+                </div>
+              </div>
+            </div>
+  
+        <hr class="my-0" />
+        {% endfor %}
+        {% else %}
+        <br><br>
+        <h1>Sorry! You Must Be Logged In To View This Page...</h1>
+      
+      <br>                                   
+      
+          
+        <h1 class="h2"><a href="/login">Login Here</a></div></h1>
+      
+        
+        
+      {% endif %}
+
+
+{% endblock body %}

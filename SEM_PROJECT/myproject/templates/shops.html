@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{% endblock title %}
+
+{% block body %}
+
+<h1>Nearby Shops</h1>
+
+<div id="map"></div>
+<ul id="list"></ul>
+<div class="container text-center content" id="container">
+    <div class="row">
+    </div>
+</div>
+
+<!-- <script src="script.js"></script> -->
+<script src="{% static 'js/nearbyShops.js' %}"></script>
+<script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyApeFBxiAUcduKVF2jFwwLVb9mhjkfqRoM&map_ids=fcbdee3387b3fdb8&callback=initMap&libraries=places">
+    </script>
+
+
+{% endblock body %}

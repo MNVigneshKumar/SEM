@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{% endblock title %}
+
+{% block body %}
+{% if user.is_authenticated %}
+{% if cycle_rented  %}   
+
+<section style="background-color: whitesmoke;">
+    <div class="container my-5 py-5">
+      <div class="row d-flex justify-content-center">
+        <div class="col-md-12 col-lg-10">
+            <div class="wrapper row">
+                <div class="preview col-md-6">
+                    
+                    <div class="preview-pic tab-content">
+                      <div class="tab-pane active" id="pic-1"><img src={{ cycle_rented.cycle_img.url }} class="img-fluid"/></div>
+                    </div>
+                    
+                </div>
+                <div class="details col-md-6">
+                    <h3 class="product-title">{{cycle_rented.model}} </h3>
+                    <div class="rating">
+                        <div class="stars">
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star checked"></span>
+                            <span class="fa fa-star"></span>
+                            <span class="fa fa-star"></span>
+                        </div>
+                        <span class="review-no">41 Rents</span>
+                    </div>
+                    <p class="product-description">The the cycle you have rented is {{cycle_rented.model}}</p>
+                    <h4 class="price">current price: <span>Rs 180</span></h4>
+                    
+                    <div>
+                        <h5>Address:</h5>
+                        {{ cycle_rented.owner.address }}
+                    </div>
+                    <div>
+                        <div>
+                            <h5>Owner:</h5>
+                            {{ cycle_rented.owner.authUser.first_name }} {{ cycle_rented.owner.authUser.last_name }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</section>
+
+<section style="background-color: whitesmoke;">
+    <div class="container my-5 py-5">
+      <div class="row d-flex justify-content-center">
+        <div class="col-md-12 col-lg-10">
+          <div class="card text-dark">
+            <h4 class="mb-0">Post your Review</h4>
+            <div class="form-outline w-100">
+                <textarea class="form-control" id="textAreaExample" rows="4"
+                  style="background: #fff;"></textarea>
+                <label class="form-label" for="textAreaExample"></label>
+            </div>
+            <div class="float-end mt-2 pt-1">
+              <button type="button" class="btn btn-primary btn-sm">Post comment</button>
+              <button type="button" class="btn btn-outline-primary btn-sm">Cancel</button>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+</section>
+
+{%endif%}
+{% else %}
+<br><br>
+<h1>Sorry! You Must Be Logged In To View This Page...</h1>
+
+<br>                                   
+
+  
+<h1 class="h2"><a href="/login">Login Here</a></div></h1>
+
+
+
+{% endif %}
+
+
+
+
+{% endblock body %}

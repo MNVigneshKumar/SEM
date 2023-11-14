@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{% endblock title %}
+
+{% block body %}
+<main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 ">
+      <h1 class="h2">Payments Details</h1>
+    </div>
+  </main>
+
+
+<h4>Payment sucessfull</h4>
+<p> Order_id : {{ payments_details.order_id }} <br>
+    Payment id : {{ payments_details.payment_id  }} <br>
+</p>
+{% if rented_details  %}  
+<a href="/rentedBikes/">Check your bike</a>
+{%endif%}
+{% endblock body %}
