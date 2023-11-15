@@ -102,7 +102,7 @@ function createMapAndMarker(lat, lng) {
     var request = {
         location: { lat: lat, lng: lng },
         radius: 5000, // Search within 5 km radius
-        query: "nearby bike repair shop" // Search for bike repair shops
+        query: "nearby cycle repair shop" // Search for bike repair shops
     };
 
     // Create a service object to perform the text search
@@ -120,9 +120,11 @@ function createMapAndMarker(lat, lng) {
                     position: results[i].geometry.location,
                     map,
                     title: results[i].name,
-                    label: results[i].place_id,
+                    //label: results[i].place_id,
+                    label: "", // keeping marker text empty
                     icon: {
-                        url: "http://localhost:8080/bike_icon.svg",
+                        //url: "http://localhost:8080/bike_icon.svg",
+                        url: "/static/images/bike_icon.svg",
                         scaledSize: new google.maps.Size(38, 31)
                     }
                 });
@@ -142,6 +144,7 @@ function createMapAndMarker(lat, lng) {
             }
 
             for (var i = 0; i < results.length; i++) {
+                console.log(results[i].name)
                 createPlaceRow(results[i]);
             }
         }
