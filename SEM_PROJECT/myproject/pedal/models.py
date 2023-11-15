@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from .managers import CustomUserManager
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
+from datetime import datetime
 
 # Create your models here.
 # class AppUser(AbstractUser, PermissionsMixin):
@@ -40,7 +41,9 @@ class Cycle(models.Model):
    lend_or_sell = models.CharField(max_length=50)
    description = models.CharField(max_length=5000)
    is_avail=models.BooleanField(default=True)
+   is_sold=models.BooleanField(default=False)
    is_being_rented=models.BooleanField(default=False)
+   end_time=models.DateTimeField(default=datetime.now())
    description = models.CharField(max_length=5000,null=True, blank=True)
    no_of_rents = models.IntegerField(default=0)
    total_stars=models.IntegerField(default=0)

@@ -37,7 +37,14 @@
             </div>
 
             <p class="product-description">{{cycle.description}}</p>
-            <h4 class="price">Price: <span>Rs {{ cycle.price }}</span></h4>
+            {% if details %}
+            <h4 class="price">Rental Details</h4>
+            <b class="price">Checkout time: </b> {{ cycle.end_time }}<br>
+            <b class="price">Rent/hr: </b><span>Rs {{ cycle.price }}</span><br>
+            <b class="price">total_rent: </b><span>Rs {{ details.total_rent }}</span><br>
+            {% else %}
+            <h4 class="price">Selling Price: <span>Rs {{ cycle.price }}</span></h4>
+            {% endif %}
             <br>
             <div>
               <h5>Address:</h5>
@@ -68,6 +75,7 @@
               <input type="hidden" name="cycle_id" value="{{ cycle.id }}" />
               <input type="hidden" name="cycle_model" value="{{ cycle.model }}" />
               <input type="hidden" name="cycle_price" value="{{ cycle.price }}" />
+              <input type="hidden" name="total_rent" value="{{ details.total_rent }}" />
               <button id="checkout" class="btn btn-success btn-lg float-right mx-2" type="submit">Checkout</button>
             </form>
 

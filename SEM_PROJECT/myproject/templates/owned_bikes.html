@@ -14,6 +14,7 @@
           <th scope="col">Cycle Id</th>
           <th scope="col">Cycle Model</th>
           <th scope="col">Being Rented</th>
+          <th scope="col">Available</th>
           <th scope="col">Rentee Name</th>
           <th scope="col">Hrs</th>
         </tr>
@@ -26,17 +27,27 @@
           <td>{{cycle.cycle_model}}</td>
           {% if cycle.being_rented %}
           <td>{{cycle.being_rented}}</td>
+          <td>{{cycle.is_avil}}</td>
           <td>{{cycle.rentee_name}}</td>
           <td>NA</td>
           {% else %}
+
+          {% if cycle.is_avail %}
+          <td>No</td>
+          <td>Yes</td>
+          <td>NA</td>
+          <td>NA</td>
+          {% else %}
+          <td>No</td>
           <td>No</td>
           <td>NA</td>
           <form id="lend" method="post" action="/lend">
             {% csrf_token %}
-            <td><input type="number" id="quantity" name="quantity" min="1" max="5"></td>
+            <td><input type="number" id="hrs" name="hrs" min="1" max="24"></td>
             <input type="hidden" name="cycle_id" value="{{ cycle.cycle_id }}" />
             <td><button id="lend" class="btn btn-success btn-sm float-right mx-2" type="submit">Lend</button></td>
           </form>
+          {% endif %}
           {% endif %}
         </tr>
         {% endfor %}

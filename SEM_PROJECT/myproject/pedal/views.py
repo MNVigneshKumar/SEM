@@ -38,11 +38,11 @@ class Review:
         self.date = date
 
 
-class User:
-    def __init__(self, user_name, email_id, contact):
-        self.user_name = user_name
-        self.email_id = email_id
-        self.contact = contact
+# class User:
+#     def __init__(self, user_name, email_id, contact):
+#         self.user_name = user_name
+#         self.email_id = email_id
+#         self.contact = contact
 
 
 # cycles=[Cycle(model='hero Razor back',address='1102 MSA 1 ',dop='06/09/19',price='190',img='cycle2.jpg'),
@@ -81,7 +81,13 @@ reviews = [
 def index(request):
     # appUser=AppUser.objects.get(authUser=request.user)
     user = request.user
+    #cycles = Cycle.objects.filter(lend_or_sell="lend", is_avail=True)
+    cycles = Cycle.objects.filter(lend_or_sell="lend", is_avail=True,end_time__lt=datetime.now())
+    for cycle in cycles:
+        cycle.is_avail=False
+        cycle.save() 
     cycles = Cycle.objects.filter(lend_or_sell="lend", is_avail=True)
+     
     if user.is_authenticated:
         appUser = AppUser.objects.get(authUser=request.user)
         cycles = (
@@ -180,9 +186,8 @@ def sell(request):
         file_key = None
         for file_key in sorted(request.FILES):
             pass
-        wrapped_file = ImageFile(request.FILES[file_key])
-        filename = wrapped_file.name
-        from .models import Cycle, AppUser
+
+
 
         cycle = Cycle()
         appUser = AppUser.objects.get(authUser=request.user)
@@ -193,6 +198,7 @@ def sell(request):
         if cycle.lend_or_sell == "lend":
             cycle.is_avail = False
         cycle.dop = request.POST["dateOfPurchase"]
+        cycle.description=request.POST["description"]
         cycle.price = request.POST["Price"]
         cycle.cycle_img = request.FILES[file_key]
         cycle.save()
@@ -220,6 +226,15 @@ def shops(request):
 def details(request, id):
     context = {"reviews": reviews}
     cycle = Cycle.objects.get(id=id)
+    dif=cycle.end_time.replace(tzinfo=None)-datetime.now()
+    
+    time_rent=dif.total_seconds() / 3600
+    total_rent=int(cycle.price*time_rent)
+    details={}
+    if cycle.lend_or_sell=="lend":
+        details={"total_rent":total_rent}
+    
+    print(f"{time_rent} {cycle.price} {total_rent}")
     context["cycle"] = cycle
     if cycle.no_of_rents != 0:
         rating = int(cycle.total_stars / cycle.no_of_rents)
@@ -227,6 +242,7 @@ def details(request, id):
     else:
         rating_stars = []
     context["rating"] = rating_stars
+    context["details"]=details
     # for cycle in cycles:
     # 	if cycle.id==id:
     # 		context["cycle"]=cycle
@@ -266,7 +282,10 @@ def owned_bikes(request):
                 "cycle_model": None,
                 "being_rented": None,
                 "rentee_name": "NA",
+                "is_avail":None
             }
+            if cycle.is_avail:
+                cycle_data["is_avail"] = "Yes"
             cycle_data["cycle_id"] = cycle.id
             cycle_data["cycle_model"] = cycle.model
             if cycle.is_being_rented:
@@ -315,9 +334,14 @@ def checkout(request):
     client = razorpay.Client(
         auth=("rzp_test_hQHF0MU9H0s3HU", "4PJIN81Fhl66bGWTLmtkj2Ma")
     )
-
+    
+    amt=int(data["cycle_price"])
+    transaction="Buy"
+    if cycle.lend_or_sell=="lend":
+        transaction="Rent"
+        amt=int(data["total_rent"])
     payment_data = {
-        "amount": int(data["cycle_price"]) * 100,
+        "amount": amt * 100,
         "currency": "INR",
         "receipt": "order_rcptid_11",
     }
@@ -328,7 +352,7 @@ def checkout(request):
         "cycle_id": data["cycle_id"],
     }
     print(f"Orders are as follows\n {orders} \n and payment_data is is {payment}\n")
-    context = {"payment": payment, "cycle": cycle, "user": user}
+    context = {"payment": payment, "cycle": cycle, "user": user,"amt":amt,"transaction":transaction}
     order = Order()
     order.user = user
     order.cycle = cycle
@@ -344,9 +368,11 @@ def checkout(request):
 
 def lend(request):
     if request.user.is_authenticated:
-        print(request.POST["cycle_id"])
+        rent_hrs=int(request.POST["hrs"])
+        print(rent_hrs)
         cycle = Cycle.objects.get(id=request.POST["cycle_id"])
         cycle.is_avail = True
+        cycle.end_time=datetime.now()+timedelta(hours=rent_hrs)
         cycle.save()
         return redirect("/")
 
@@ -376,11 +402,13 @@ def payments(request):
         rent.cycle = cycle
         rent.start_time = current_dateTime
         rent.payment = payment
-        rent.end_time = current_dateTime + timedelta(hours=2)
+        rent.end_time =cycle.end_time
         rent.save()
         cycle.no_of_rents += 1
         cycle.is_being_rented = True
         rented_details.append(rent)
+    else:
+        cycle.is_sold=True
 
     cycle.is_avail = False
 
