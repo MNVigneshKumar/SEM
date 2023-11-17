@@ -6,7 +6,7 @@ import razorpay
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import SignUpForm, CycleForm
-from .models import Cycle, AppUser, Order, Payment, Rent
+from .models import Cycle, AppUser, Order, Payment, Rent, Transaction
 from datetime import datetime, timedelta
 from chat.models import Room
 
@@ -260,10 +260,14 @@ def rented_bikes(request):
             if rent.end_time.replace(tzinfo=None) < current_dateTime:
                 rent.is_avail = False
                 cycle = rent.cycle
+                print("changing being rented to false from rented bike table ")
                 cycle.is_being_rented = False
                 rent.save()
                 cycle.save()
                 print("Rent Duration Over")
+            # else:
+            #     rent.cycle.is_being_rented =True
+            #     rent.cycle.save()
             # owned_cycle=Cycle.objects.get(owner=appUser,lend_or_sell="sell")
             cycle_rented = rent.cycle
             context["cycle_rented"] = cycle_rented
@@ -275,6 +279,7 @@ def owned_bikes(request):
     if request.user.is_authenticated:
         appUser = AppUser.objects.get(authUser=request.user)
         owned_cycles = Cycle.objects.filter(owner=appUser, lend_or_sell="lend").all()
+        cycles_for_sale = Cycle.objects.filter(owner=appUser, lend_or_sell="sell").all()
         cycles = []
         for cycle in owned_cycles:
             cycle_data = {
@@ -289,13 +294,16 @@ def owned_bikes(request):
             cycle_data["cycle_id"] = cycle.id
             cycle_data["cycle_model"] = cycle.model
             if cycle.is_being_rented:
-                rent = Rent.objects.get(cycle=cycle)
+                rent = Rent.objects.filter(cycle=cycle,is_avail=True)[0]
                 current_dateTime = datetime.now()
                 if rent.end_time.replace(tzinfo=None) < current_dateTime:
+                    print(rent.end_time.replace(tzinfo=None))
+                    print(current_dateTime)
                     rent.is_avail = False
                     cycle_rented = rent.cycle
                     cycle_rented.is_being_rented = False
                     rent.save()
+                    print("changing being rented to false from owned bike table ")
                     cycle_rented.save()
                 else:
                     cycle_data["being_rented"] = "Yes"
@@ -312,6 +320,7 @@ def owned_bikes(request):
         # for c in own
         # cycle_rented=rent.cycle
         context["owned_cycles"] = cycles
+        context["cycles_for_sale"]=cycles_for_sale
 
         # messages logic
         rooms = Room.objects.filter(cycle_id__in=owned_cycles).all()
@@ -358,6 +367,7 @@ def checkout(request):
     order.cycle = cycle
     order.razorpay_order_id = payment["id"]
     order.payment_staus = "payment requested"
+    order.amount=amt
     order.save()
 
     import json
@@ -384,35 +394,66 @@ def payments(request):
         "order_id": request.POST["razorpay_order_id"],
         "payment_id": request.POST["razorpay_payment_id"],
     }
+
     payment = Payment()
     payment.razorpay_order_id = request.POST["razorpay_order_id"]
     payment.razorpay_payment_id = request.POST["razorpay_payment_id"]
     payment.razorpay_signature = request.POST["razorpay_signature"]
-    payment.save()
     order = Order.objects.get(razorpay_order_id=payment.razorpay_order_id)
     order.payment_staus = "payment sucessful"
     order.save()
+    
+    payment.amount=order.amount
+    payment.save()
+    
+
 
     current_dateTime = datetime.now()
     cycle = order.cycle
     rented_details = []
+    appuser=AppUser.objects.get(authUser=request.user)
+
+    transaction1=Transaction()
+    transaction2=Transaction()
+    transaction1.payment=payment
+    transaction1.cycle=cycle
+    transaction1.user=appuser
+    transaction1.transaction_with=cycle.owner
+    
+    transaction2.payment=payment
+    transaction2.cycle=cycle
+    transaction2.user=cycle.owner
+    transaction2.transaction_with=appuser
+
+
+
+
     if cycle.lend_or_sell == "lend":
         rent = Rent()
-        rent.user = AppUser.objects.get(authUser=request.user)
+        rent.user = appuser
         rent.cycle = cycle
         rent.start_time = current_dateTime
         rent.payment = payment
         rent.end_time =cycle.end_time
         rent.save()
         cycle.no_of_rents += 1
-        cycle.is_being_rented = True
+        cycle.is_being_rented =True
+        print("changing being rented to true while renting")
         rented_details.append(rent)
+
+        transaction1.transaction_name="Rent"
+        transaction2.transaction_name="Lend"
     else:
         cycle.is_sold=True
+        cycle.sold_to=appuser
+        transaction1.transaction_name="Buy"
+        transaction2.transaction_name="Sell"
 
     cycle.is_avail = False
 
     cycle.save()
+    transaction1.save()
+    transaction2.save()
     cycle_id = orders[request.POST["razorpay_order_id"]]["cycle_id"]
     payments_details["cycle_id"] = cycle_id
     context = {"payments_details": payments_details, "rented_details": rented_details}

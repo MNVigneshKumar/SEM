@@ -34,7 +34,7 @@ class AppUser(models.Model):
 
 class Cycle(models.Model):
    cycle_img    = models.ImageField(null=True, blank=True, upload_to="images/")
-   owner =models.ForeignKey(AppUser, blank=True, null=True, on_delete=models.SET_NULL)
+   owner =models.ForeignKey(AppUser, blank=True, null=True, on_delete=models.SET_NULL,related_name='current_owner')
    dop = models.DateTimeField('Date of Purchase')
    model = models.CharField(max_length=50)
    price=models.IntegerField()
@@ -47,6 +47,7 @@ class Cycle(models.Model):
    description = models.CharField(max_length=5000,null=True, blank=True)
    no_of_rents = models.IntegerField(default=0)
    total_stars=models.IntegerField(default=0)
+   sold_to =models.ForeignKey(AppUser,default=None, blank=True, null=True, on_delete=models.SET_NULL,related_name='cycle_buyer')
 
    #Cycle(model='hero Razor back',address='1102 MSA 1 ',dop='06/09/19',price='190',img='cycle2.jpg')
 
@@ -55,11 +56,13 @@ class Order(models.Model):
    payment_staus=models.CharField(max_length=50)
    user =models.ForeignKey(AppUser, blank=True, null=True, on_delete=models.SET_NULL)
    cycle =models.ForeignKey(Cycle, blank=True, null=True, on_delete=models.SET_NULL)
+   amount = models.IntegerField(default=0)
 
 class Payment(models.Model):
    razorpay_payment_id=models.CharField(unique=True,max_length=50)
    razorpay_order_id=models.CharField(unique=True,max_length=50)
    razorpay_signature=models.CharField(max_length=1000)
+   amount = models.IntegerField(default=0)
    # payment_staus=models.CharField(max_length=50)
    # user =models.ForeignKey(AppUser, blank=True, null=True, on_delete=models.SET_NULL)
    # cycle =models.ForeignKey(Cycle, blank=True, null=True, on_delete=models.SET_NULL)
@@ -72,4 +75,13 @@ class Rent(models.Model):
    start_time=models.DateTimeField()
    end_time=models.DateTimeField()
    is_avail=models.BooleanField(default=True)
+   
+
+class Transaction(models.Model):
+   payment=models.ForeignKey(Payment, blank=True, null=True, on_delete=models.SET_NULL)
+   user =models.ForeignKey(AppUser, blank=True, null=True, on_delete=models.SET_NULL,related_name='first_party')
+   cycle =models.ForeignKey(Cycle, blank=True, null=True, on_delete=models.SET_NULL)
+   transaction_with =models.ForeignKey(AppUser, blank=True, null=True, on_delete=models.SET_NULL,related_name='other_party')
+   transaction_time=models.DateTimeField(default=datetime.now())
+   transaction_name=models.CharField(max_length=50)
    
