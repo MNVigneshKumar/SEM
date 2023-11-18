@@ -3,7 +3,49 @@
 {% block title %}{% endblock title %}
 
 {% block body %}
+    {% if user.is_authenticated %}
+        {% if transactions %}
+        <br><br>
+            <h2>Your Transaction History</h2>
 
-This is history
+            <section style="background-color: whitesmoke;">
+                <div class="container my-5 py-5">
+                <table class="table">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">S. No</th>
+                        <th scope="col">Transaction</th>
+                        <th scope="col">Client/Owner Name</th>
+                        <th scope="col">Cycle Model</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Transaction Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td>{{transaction.transaction_name}}</td>
+                        <td>{{transaction.transaction_with.authUser.first_name}} {{transaction.transaction_with.authUser.last_name}}</td>
+                        <td>{{transaction.cycle.model}}</td>
+                        <td>{{transaction.payment.amount}}</td>
+                        <td>{{transaction.transaction_time}}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
 
+            </section>
+
+        {%endif%}
+    {% else %}
+        <br><br>
+        <h1>Sorry! You Must Be Logged In To View This Page...</h1>
+      
+        <br>
+      
+      
+        <h1 class="h2"><a href="/login">Login Here</a></div>
+        </h1>
+    {%endif%}
 {% endblock body %}

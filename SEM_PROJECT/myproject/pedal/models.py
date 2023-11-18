@@ -84,4 +84,20 @@ class Transaction(models.Model):
    transaction_with =models.ForeignKey(AppUser, blank=True, null=True, on_delete=models.SET_NULL,related_name='other_party')
    transaction_time=models.DateTimeField(default=datetime.now())
    transaction_name=models.CharField(max_length=50)
+
+class Wallet(models.Model):
+   user =models.ForeignKey(AppUser, blank=True, null=True, on_delete=models.SET_NULL)
+   balance = models.IntegerField(default=0)
+   deposit_complete=models.BooleanField(default=False)
+   deposit_amount = models.IntegerField(default=0)
+
+
+
+class WalletTransaction(models.Model):
+   wallet=models.ForeignKey(Wallet, blank=True, null=True, on_delete=models.SET_NULL)
+   transaction=models.ForeignKey(Transaction, blank=True, null=True, on_delete=models.SET_NULL)
+   amount = models.IntegerField(default=0)
+   transaction_from =models.ForeignKey(AppUser, blank=True, null=True, on_delete=models.SET_NULL,related_name='transaction_from')
+   transaction_time=models.DateTimeField(default=datetime.now())
+   transaction_name=models.CharField(max_length=50)
    

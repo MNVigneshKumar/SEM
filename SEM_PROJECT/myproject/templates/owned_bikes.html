@@ -5,6 +5,7 @@
 {% block body %}
 {% if user.is_authenticated %}
     {% if owned_cycles %}
+    <br><br>
     <h2>Cycles to Lend</h2>
       <section style="background-color: whitesmoke;">
         <div class="container my-5 py-5">
@@ -17,6 +18,7 @@
                 <th scope="col">Status</th>
                 <th scope="col">Rentee Name</th>
                 <th scope="col">Rent Hours</th>
+                <th scope="col"></th>
               </tr>
             </thead>
 
@@ -37,10 +39,11 @@
                       <td>Available on portal</td>
                       <td>Not rented yet</td>
                       <td>Already on portal</td>
+                      <td></td>
                     {% else %}
                       <td>No</td>
                       <td>Not on portal</td>
-                      <td><h2>Cycles for Sale</h2></td>
+                      <td>Not rented yet</td>
                       <form id="lend" method="post" action="/lend">
                         {% csrf_token %}
                         <td><input type="number" id="hrs" name="hrs" min="1" max="24"></td>
@@ -84,7 +87,7 @@
                   <td>{{cycle.sold_to.authUser.first_name}} {{cycle.sold_to.authUser.last_name}}</td>
                 {% else %}
                   <td>Not Sold</td>
-                  <td>Not Bought Yet</td>
+                  <td>Not Applicable</td>
                 {% endif %}
               </tr>
               {% endfor %}
@@ -96,33 +99,38 @@
     {%endif%}
 
     {% if rooms %}
-      <section style="background-color: whitesmoke;">
-        <h3 class="product-title">Messages: </h3>
-        <table>
-          <tr>
-            <th>Room </th>
-            <th>Cycle ID</th>
-            <th>Customer Name</th>
-            <th>Chat Link</th>
-          </tr>
+    <h2>Messages from users</h2>
+    <section style="background-color: whitesmoke;">
+      <div class="container my-5 py-5">
+        <table class="table">
+          <thead class="thead-dark">
+            <tr>
+              <th>Room </th>
+              <th>Cycle ID</th>
+              <th>Customer Name</th>
+              <th>Chat Link</th>
+            </tr>
+          </thead>
           {% for room in rooms %}
           <tr>
             <td>{{room.name}}</td>
             <td>{{room.cycle_id}}</td>
-            <td>{{room.user_id}}</td>
+            <td>{{room.user.first_name}} {{room.user.last_name}}</td>
             <td>
               <form id="chat" method="post" action="/chat/checkview_owner">
                 {% csrf_token %}
                 <input type="hidden" name="room_name" value="{{ room.name }}" />
                 <input type="hidden" name="user_id" value="{{ user.id }}" />
                 <input type="hidden" name="seller_name" value="{{ user.username }}" />
-                <button id="chat" class="btn btn-success btn-lg float-right" type="submit">Chat with customer</button>
+                <button id="chat" class="btn btn-success btn-sm float-centre mx-2" type="submit">Chat with customer</button>
               </form>
             </td>
           </tr>
           {% endfor %}
         </table>
       </section>
+      <br>
+      <br>
     {%endif%}
 
 

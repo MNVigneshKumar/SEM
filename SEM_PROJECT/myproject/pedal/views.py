@@ -6,7 +6,7 @@ import razorpay
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import SignUpForm, CycleForm
-from .models import Cycle, AppUser, Order, Payment, Rent, Transaction
+from .models import Cycle, AppUser, Order, Payment, Rent, Transaction, Wallet,WalletTransaction
 from datetime import datetime, timedelta
 from chat.models import Room
 
@@ -211,12 +211,46 @@ def sell(request):
     # return render(request, "sell.html")
 
 
-def reports(request):
-    return render(request, "reports.html")
+def wallet(request):
+    appUser = AppUser.objects.filter(authUser=request.user)[0]
+    context={}
+    wallet = Wallet.objects.filter(user=appUser)[0]
+    
+    # if len(wallet)==0:
+    #     wallet=Wallet()
+    #     wallet.user=appUser
+    #     wallet.save()
+    transactions=WalletTransaction.objects.filter(wallet=wallet)
+    # if len(transactions)==0:
+    #     a=Transaction.objects.filter(user=appUser)
+    #     for i in a:
+    #         wallet_trans=WalletTransaction()
+    #         wallet_trans.wallet=wallet
+    #         wallet_trans.transaction_from=i.transaction_with
+    #         wallet_trans.amount=i.payment.amount
+    #         wallet.balance+=i.payment.amount
+    #         wallet_trans.transaction=i
+    #         wallet_trans.transaction_time=i.transaction_time
+    #         wallet_trans.transaction_name=i.transaction_name
+    #         wallet_trans.save()
+    #         wallet.save()
+    
+    context["transactions"]=transactions
+    context["balance"]=wallet.balance
+
+
+    return render(request, "wallet.html",context=context)
 
 
 def history(request):
-    return render(request, "history.html")
+    context={}
+    if request.user.is_authenticated:
+        appUser = AppUser.objects.filter(authUser=request.user)[0]
+        transactions = Transaction.objects.filter(user=appUser)
+        context["transactions"]=transactions
+        #print(transactions[0].transaction_name)
+
+    return render(request, "history.html",context=context)
 
 
 def shops(request):
@@ -411,7 +445,8 @@ def payments(request):
     current_dateTime = datetime.now()
     cycle = order.cycle
     rented_details = []
-    appuser=AppUser.objects.get(authUser=request.user)
+    print(request.user.username)
+    appuser=order.user
 
     transaction1=Transaction()
     transaction2=Transaction()
@@ -454,6 +489,20 @@ def payments(request):
     cycle.save()
     transaction1.save()
     transaction2.save()
+    
+    wallet = Wallet.objects.filter(user=transaction2.user)[0]
+    wallet_trans=WalletTransaction()
+    wallet_trans.wallet=wallet
+    wallet_trans.transaction_from=transaction2.transaction_with
+    wallet_trans.amount=transaction2.payment.amount
+    wallet.balance+=transaction2.payment.amount
+    wallet_trans.transaction=transaction2
+    wallet_trans.transaction_time=transaction2.transaction_time
+    wallet_trans.transaction_name=transaction2.transaction_name
+    wallet_trans.save()
+    wallet.save()
+
+
     cycle_id = orders[request.POST["razorpay_order_id"]]["cycle_id"]
     payments_details["cycle_id"] = cycle_id
     context = {"payments_details": payments_details, "rented_details": rented_details}
