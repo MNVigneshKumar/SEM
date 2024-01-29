@@ -81,7 +81,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "pedal",
         "USER": "root",
-        "PASSWORD": "password",
+        "PASSWORD": "Vignesh@567$",  # ------------------ This thing is updated here for my setup only ..... 
         "HOST": "127.0.0.1",
         "PORT": "3306",
         "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'"},
